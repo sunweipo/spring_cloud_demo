@@ -17,6 +17,7 @@ public class SynContainer {
         this.notifyAll();
     }
     public synchronized Product pop() throws InterruptedException {
+
         //判断能否消费
         if(count==0){
             //等待生产者生产，消费者等待
