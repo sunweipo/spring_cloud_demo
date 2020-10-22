@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="gateway_server" />
+        <module name="import_test" />
+        <module name="multi_thread_test" />
+        <module name="myeureka_server" />
+        <module name="order_service" />
+        <module name="product_service" />
+        <module name="stream_consumer" />
+        <module name="stream_producer" />
+        <module name="zuul_server" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="eureka_server" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

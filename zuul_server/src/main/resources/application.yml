@@ -1,0 +1,30 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: api-zuul-server #服务名
+#路由配置
+zuul:
+  routes:
+    #以商品微服务举例
+#    service-product: #路由id，唯一标识，随便写
+#      path: /service-product/** #localhost:8080/service-product/abcd将会转发到指定的微服务下 #映射路径
+#      #url: http://127.0.0.1:9003 #映射路径对应的实际微服务地址
+#      serviceId: SERVICE-PRODUCT #配置转发的微服务的服务名称（从eureka中获取）
+      #简化配置：如果路由id和对应的serviceId一致的话，可以简化为以下操作
+    service-product: /service-product/**
+    #zuul中的默认路由配置
+    #如果当前的微服务名称service-product,默认的请求映射路径/service-product/**
+    #没有配置order，但是可以直接访问http://127.0.0.1:8080/service-order/order/useFeignBuy/1
+
+
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+
+#配置eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka/ #多个eurekaserver之间用,隔开，
+      #比如http://localhost:9000/eureka/,http://localhost:8000/eureka/

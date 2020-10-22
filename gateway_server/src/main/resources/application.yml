@@ -1,0 +1,94 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: api-gateway-server #服务名
+  redis:
+    database: 0
+    # Redis服务器地址
+    host: localhost
+    # Redis服务器连接端口
+    port: 6379
+    timeout: 5000
+    # Redis服务器连接密码（默认为空）
+    password:
+    # 连接池最大连接数（使用负值表示没有限制） 默认 8
+    lettuce:
+      pool:
+        max-active: 8
+        # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-wait: -1
+        # 连接池中的最大空闲连接 默认 8
+        max-idle: 8
+        # 连接池中的最小空闲连接 默认 0
+        min-idle: 0
+  zipkin:
+    #base-url: http://127.0.0.1:9411/
+    sender:
+      type: rabbit
+    #type: web #数据的传输方式，以http的形式向server端发送数据
+  sleuth:
+    sampler:
+      probability: 1 #采样比，0.1代表只收集10%的数据
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener: # 这里配置了重试策略
+      direct:
+        retry:
+          enabled: true
+      simple:
+        retry:
+          enabled: true
+
+  #配置spring cloud gateway的路由
+  cloud:
+    gateway:
+      routes:
+      #配置路由：路由id，路由到微服务的uri，断言（判断条件，条件满足才会进入到微服务）
+      - id: service-product   #保持唯一
+        #uri: http://127.0.0.1:9003  #目标微服务请求地址
+        uri: lb://service-product #lb://的意思是根据微服务的服务名从注册中心拉取微服务的请求路径
+        predicates:
+        #- Path=/product/**  #路由条件中的路径匹配条件。和zuul不一样，zuul是把/**追加到uri后面，此处是将整个/product/**追加到uri后
+        - Path=/service-product/** #会将当前请求转发到http://127.0.0.1:9003/service-product/** 路径下
+                                   #，可以使用过滤器将/service-product移除
+        filters: #配置一个路由过滤器,在yml中$需要写出$\
+#        - name: RequestRateLimiter
+#          args:
+#            # 使用SpEL从容器中获取对象，需要自己创建
+#            key-resolver: '#{@pathKeyResolver}'
+#            # 令牌桶每秒填充平均速率
+#            redis-rate-limiter.replenishRate: 1
+#            # 令牌桶的上限
+#            redis-rate-limiter.burstCapacity: 3
+        - RewritePath=/service-product/(?<segment>.*),/$\{segment} #路径重写过滤器，会将/service-product去掉重新转发
+        #配置自动的根据微服务名称进行路由转发
+      discovery:
+        locator:
+          enabled: true #开启根据服务名称自动转发
+          lower-case-service-id: true #微服务名称以小写形式呈现
+
+
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+
+#eureka注册中心的信息
+#配置eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka/ #多个eurekaserver之间用,隔开，
+      #比如http://localhost:9000/eureka/,http://localhost:8000/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    root: info
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.cloud.sleuth: DEBUG

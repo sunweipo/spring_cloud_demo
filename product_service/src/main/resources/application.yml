@@ -1,0 +1,47 @@
+server:
+  port: 9003
+spring:
+  application:
+    name:
+      service-product
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/testmydb?characterEncoding=UTF-8&serverTimezone = GMT&useSSL=false
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+    show-sql: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener: # 这里配置了重试策略
+      direct:
+        retry:
+          enabled: true
+      simple:
+        retry:
+          enabled: true
+    #配置eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka/ #多个eurekaserver之间用,隔开，
+      #比如http://localhost:9000/eureka/,http://localhost:8000/eureka/
+  instance:
+    prefer-ip-address: true #使用ip地址注册
+    instance-id: ${spring.cloud.client.ip-address}:${server.port} #向注册中心中注册服务id
+    #lease-renewal-interval-in-seconds: 5 #发送心跳的间隔
+    # lease-expiration-duration-in-seconds: 10 #续约到期的时间
+
+logging:
+  level:
+    root: info
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.cloud.sleuth: DEBUG

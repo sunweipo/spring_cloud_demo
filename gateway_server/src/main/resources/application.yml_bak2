@@ -1,0 +1,50 @@
+server:
+  port: 8081 #端口
+spring:
+  application:
+    name: api-gateway-server #服务名称
+  redis:
+    host: localhost
+    pool: 6379
+    database: 0
+  cloud: #配置SpringCloudGateway的路由
+    gateway:
+      routes:
+      - id: service-product
+        uri: lb://service-product
+        predicates:
+        - Path=/service-product/**
+        filters:
+        - name: RequestRateLimiter
+          args:
+            # 使用SpEL从容器中获取对象
+            key-resolver: '#{@pathKeyResolver}'
+            # 令牌桶每秒填充平均速率
+            redis-rate-limiter.replenishRate: 1
+            # 令牌桶的上限
+            redis-rate-limiter.burstCapacity: 3
+        - RewritePath=/service-product/(?<segment>.*),/$\{segment}
+      discovery:
+        locator:
+          enabled: true #开启根据服务名称自动转发
+          lower-case-service-id: true #微服务名称以小写形式呈现
+
+  # RequestRateLimiter : 使用限流过滤器,是springcloud gateway提供的
+  # 参数  replenishRate : 向令牌桶中填充的速率
+  #     burstCapacity :令牌桶的容量
+
+
+
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+
+#eureka注册中心的信息
+#配置eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka/ #多个eurekaserver之间用,隔开，
+      #比如http://localhost:9000/eureka/,http://localhost:8000/eureka/
+  instance:
+    prefer-ip-address: true

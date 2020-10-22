@@ -1,0 +1,25 @@
+server:
+  port: 7002
+spring:
+  application:
+    name: stream_consumer
+  rabbitmq:
+    addresses: 127.0.0.1
+    username: guest
+    password: guest
+  cloud:
+    stream:
+      instanceCount: 2 #消费者总数
+      instanceIndex: 0 #当前消费者的索引（从0开始）
+      bindings:
+        input: #内置获取消息的通道
+          destination: itcast-default
+        myinput:
+          destination: itcast-custom-output
+          group: group1 #默认情况下，存在多个消费者的时候，每一个监听同一个通道的消费者，都会接受到消息，但是设置了分组，一个分组只会有
+                        #一个消费者接受到消息
+          consumer:
+            partitioned: true #开启分区支持
+      binders: #配置绑定器
+        defaultRabbit:
+          type: rabbit
